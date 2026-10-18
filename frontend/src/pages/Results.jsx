@@ -57,15 +57,16 @@ function Week({ w, open, onToggle }) {
   )
 }
 
-export default function Results({ settings, session, save }) {
-  const [input, setInput] = useState(settings.team_id || '')
-  const [teamId, setTeamId] = useState(settings.team_id || '')
+export default function Results({ settings, session, save, openConnect }) {
+  const [input, setInput] = useState('')
+  const [other, setOther] = useState('')
+  const teamId = other || settings.team_id
   const [open, setOpen] = useState(null)
   const [msg, setMsg] = useState('')
   const r = useApi(teamId ? `/reports?team_id=${teamId}` : null)
   const weeks = r.data?.weeks || []
 
-  const pick = (e) => { e.preventDefault(); setTeamId(input.trim()); setOpen(null) }
+  const pick = (e) => { e.preventDefault(); setOther(input.trim()); setOpen(null) }
   const exportCSV = () => downloadCSV(`gaffer-results-${teamId}.csv`, weeks, [
     ['Gameweek', (w) => w.gw], ['Points', (w) => w.points], ['Predicted', (w) => w.predicted], ['Difference', (w) => f1(w.points - w.predicted)],
     ["Gaffer lineup (actual)", (w) => w.gaffer_actual], ['Your lineup before auto-subs', (w) => w.lineup_actual],
@@ -91,12 +92,17 @@ export default function Results({ settings, session, save }) {
           <button className="btn secondary" onClick={() => window.print()}><Printer size={16} /> Print or PDF</button>
         </>} />
 
-      <Card className="no-print">
-        <form className="form" onSubmit={pick}>
+      {!settings.team_id && (
+        <Card><div className="empty"><h2>Connect your FPL team</h2><p>Weekly results use your team ID. Connect it once and this page fills itself in every time.</p><button className="btn" onClick={openConnect}>Connect my team</button></div></Card>
+      )}
+      <details className="no-print">
+        <summary className="muted" style={{ cursor: 'pointer' }}>Look at a different team</summary>
+        <Card><form className="form" onSubmit={pick}>
           <label className="field">FPL team ID<input className="input" inputMode="numeric" pattern="[0-9]*" required value={input} onChange={(e) => setInput(e.target.value)} placeholder="e.g. 1234567" /></label>
           <button className="btn">Show results</button>
-        </form>
-      </Card>
+          {other && <button type="button" className="btn secondary" onClick={() => { setOther(''); setInput('') }}>Back to my team</button>}
+        </form></Card>
+      </details>
 
       {r.loading && <Loading rows={2} />}
       {r.error && <ErrorBox error={r.error} onRetry={r.reload} />}
@@ -105,7 +111,7 @@ export default function Results({ settings, session, save }) {
           <div className="empty">
             <h2>{r.data.tracked ? 'Waiting for the next update' : 'This team is not tracked yet'}</h2>
             {r.data.tracked
-              ? <p>Weekly results for this team appear after the next data update, usually within 4 hours. Every finished gameweek this season is included.</p>
+              ? <p>Gaffer is tracking this team. Weekly results appear after the next data update, usually within 4 hours, and include every finished gameweek this season.</p>
               : session
                 ? <><p>Track this team and Gaffer will publish every gameweek this season, then a new report after each gameweek.</p><button className="btn" onClick={track}>Track team {teamId}</button></>
                 : <p>Sign in from the menu, then save this team ID to switch on weekly results.</p>}

@@ -120,6 +120,7 @@ async def main_async():
 
         # ---- weekly team reports
         tracked = {r[0] for r in conn.execute("select team_id from user_settings where team_id is not null")}
+        tracked |= {r[0] for r in conn.execute("select team_id from tracked_teams")}
         tracked |= {int(x) for x in os.getenv("TRACK_TEAM_IDS", "").replace(" ", "").split(",") if x.isdigit()}
         if mock and not tracked:
             tracked = {1234567}

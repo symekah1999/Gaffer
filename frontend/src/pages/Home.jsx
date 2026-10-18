@@ -4,12 +4,12 @@ import { Card, PlayerRow, Loading, Stat } from '../components/ui.jsx'
 import { LineChart } from '../components/Charts.jsx'
 import { countdown, localTime, f1, int, signed } from '../util.js'
 
-function LastWeek({ teamId }) {
+function LastWeek({ teamId, openConnect }) {
   const r = useApi(teamId ? `/reports?team_id=${teamId}` : null)
   if (!teamId) return (
     <Card title="Your last gameweek" icon={Trophy}>
-      <p className="muted">Add your FPL team ID on My team to see your weekly score against Gaffer's predictions here.</p>
-      <a className="btn secondary" href="#/team">Add my team</a>
+      <p className="muted">Connect your FPL team to see your weekly score against Gaffer's predictions here.</p>
+      <button className="btn" onClick={openConnect}>Connect my team</button>
     </Card>
   )
   if (r.loading) return <div className="skeleton" />
@@ -34,7 +34,7 @@ function LastWeek({ teamId }) {
   )
 }
 
-export default function Home({ status, settings }) {
+export default function Home({ status, settings, openConnect }) {
   const now = useNow(30000)
   const ins = useApi('/insights')
   const i = ins.data
@@ -56,7 +56,7 @@ export default function Home({ status, settings }) {
           <Card title="Captain picks" icon={Crown} sub={`Expected points for GW${status.next_gw}`} action={<a className="more" href="#/insights">More</a>}>
             <ul className="list">{i.captains.slice(0, 3).map((p) => <PlayerRow key={p.id} p={p} value={p.xp_next} sub="xP" max={i.captains[0].xp_next} />)}</ul>
           </Card>
-          <LastWeek teamId={settings.team_id} />
+          <LastWeek teamId={settings.team_id} openConnect={openConnect} />
           <Card title="Differentials" icon={Sparkles} sub="Under 8% owned, next 3 gameweeks">
             <ul className="list">{i.differentials.slice(0, 3).map((p) => <PlayerRow key={p.id} p={p} value={p.xp3} sub="xP" />)}</ul>
           </Card>

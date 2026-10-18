@@ -237,3 +237,12 @@ tr.benched td { color: var(--muted); }
 
 .week-body .stat b { font-size: 1.2rem; }
 .week-body .stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+.team-chip { display: flex; align-items: center; gap: .65rem; width: 100%; text-align: left; background: var(--side-hover); border: 1px solid rgba(255,255,255,.12);
+  color: var(--side-ink); padding: .6rem .75rem; border-radius: var(--r-md); cursor: pointer; }
+.team-chip:hover { background: rgba(255,255,255,.14); }
+.team-chip svg { flex: none; color: var(--bib); }
+.team-chip span { display: grid; min-width: 0; }
+.team-chip b { font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-chip small { color: var(--side-muted); }
+.connected { display: flex; align-items: center; gap: .8rem; min-height: 2.5rem; }

@@ -62,3 +62,9 @@ create table if not exists team_reports (
   created_at  timestamptz not null default now(),
   primary key (team_id, gw)
 );
+
+-- Teams registered for weekly reports from inside the app (no GitHub setting needed).
+create table if not exists tracked_teams (
+  team_id   int primary key,
+  added_at  timestamptz not null default now()
+);

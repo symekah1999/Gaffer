@@ -14,6 +14,7 @@ SB_KEY = os.getenv("SUPABASE_ANON_KEY")
 FPL = "https://fantasy.premierleague.com/api"
 UA = {"User-Agent": "Mozilla/5.0 (gaffer fpl planner)"}
 HORIZON = 8
+DEFAULT_TEAM = (os.getenv("DEFAULT_TEAM_ID") or "").strip()
 
 app = FastAPI(title="Gaffer API")
 
@@ -43,9 +44,12 @@ def snapshot():
     if _snap["data"] and time.time() - _snap["checked"] < 120:
         return _snap["data"]
     with db() as c:
-        row = c.execute("select id from snapshots order by id desc limit 1").fetchone()
+        try:
+            row = c.execute("select id from snapshots order by id desc limit 1").fetchone()
+        except psycopg.errors.UndefinedTable:
+            row = None
         if not row:
-            raise HTTPException(503, "No projections yet. In GitHub, open Actions > Update projections > Run workflow.")
+            raise HTTPException(503, "No projections yet. The data job is still running or has not been run. In GitHub, open Actions > Update projections and check it finished with a green tick.")
         if row["id"] != _snap["id"]:
             s = c.execute("select * from snapshots where id = %s", (row["id"],)).fetchone()
             s["by_id"] = {p["id"]: p for p in s["players"]}
@@ -258,11 +262,48 @@ def status():
     try:
         s = snapshot()
         return dict(state="ready", next_gw=s["next_gw"], source=s["source"], updated_at=s["created_at"].isoformat(),
-                    next_deadline=s["meta"].get("next_deadline"), auth=bool(SB_URL and SB_KEY))
+                    next_deadline=s["meta"].get("next_deadline"), auth=bool(SB_URL and SB_KEY),
+                    default_team_id=int(DEFAULT_TEAM) if DEFAULT_TEAM.isdigit() else None)
     except HTTPException as e:
         return dict(state="empty" if e.status_code == 503 else "error", message=e.detail)
     except Exception as e:
         return dict(state="error", message=f"Database error: {e.__class__.__name__}. Check DATABASE_URL.")
+
+
+@app.get("/api/team")
+def team_info(team_id: int):
+    """Look up a public FPL team so the app can confirm who you connected."""
+    s = snapshot()
+    if s["source"] == "mock":
+        return dict(team_id=team_id, name=f"Demo XI {team_id}", manager="Demo Manager", points=None, rank=None)
+    e = fpl_get(f"/entry/{team_id}/")
+    return dict(team_id=team_id, name=e.get("name"),
+                manager=f"{e.get('player_first_name', '')} {e.get('player_last_name', '')}".strip(),
+                points=e.get("summary_overall_points"), rank=e.get("summary_overall_rank"))
+
+
+MAX_TRACKED = 25
+
+
+class TrackReq(BaseModel):
+    team_id: int
+
+
+@app.post("/api/track")
+def track_team(r: TrackReq):
+    """Register a team for weekly results. Capped, and only real FPL teams are accepted."""
+    s = snapshot()
+    if s["source"] != "mock":
+        fpl_get(f"/entry/{r.team_id}/")            # 404s for teams that don't exist
+    with db() as c:
+        c.execute("create table if not exists tracked_teams (team_id int primary key, added_at timestamptz not null default now())")
+        known = c.execute("select 1 from tracked_teams where team_id = %s", (r.team_id,)).fetchone()
+        if not known:
+            n = c.execute("select count(*) as n from tracked_teams").fetchone()["n"]
+            if n >= MAX_TRACKED:
+                raise HTTPException(429, "Gaffer is tracking its maximum number of teams right now.")
+            c.execute("insert into tracked_teams (team_id) values (%s)", (r.team_id,))
+    return dict(tracked=True, new=not known)
 
 
 @app.get("/api/players")
@@ -341,7 +382,8 @@ def team_reports(team_id: int):
     try:
         with db() as c:
             rows = c.execute("select data from team_reports where team_id = %s order by gw", (team_id,)).fetchall()
-            tracked = rows or c.execute("select 1 from user_settings where team_id = %s", (team_id,)).fetchone()
+            tracked = rows or c.execute("select 1 from user_settings where team_id = %s", (team_id,)).fetchone() \
+                or c.execute("select 1 from tracked_teams where team_id = %s", (team_id,)).fetchone()
     except psycopg.errors.UndefinedTable:
         rows, tracked = [], False
     weeks = [r["data"] for r in rows]

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Home, Shirt, Trophy, Lightbulb, Users, CalendarDays, Wrench, Gauge, Download, Menu, X, LogIn, LogOut } from 'lucide-react'
+import { Link2, Home, Shirt, Trophy, Lightbulb, Users, CalendarDays, Wrench, Gauge, Download, Menu, X, LogIn, LogOut } from 'lucide-react'
 import { supabase } from '../supabase.js'
 import { useInstall } from '../hooks.js'
 import { ago } from '../util.js'
@@ -18,7 +18,7 @@ export const PAGES = [
   ['model', 'Model & accuracy', Gauge],
 ]
 
-export default function Shell({ route, status, session, children }) {
+export default function Shell({ route, status, session, team, teamId, openConnect, children }) {
   const [open, setOpen] = useState(false)
   const [dialog, setDialog] = useState(null)
   const install = useInstall()
@@ -40,6 +40,12 @@ export default function Shell({ route, status, session, children }) {
           <div><b>Gaffer</b><span>FPL planner</span></div>
           {open && <button className="icon-btn" style={{ marginLeft: 'auto' }} onClick={() => setOpen(false)} aria-label="Close menu"><X size={22} /></button>}
         </div>
+        <button className="team-chip" onClick={openConnect}>
+          <Link2 size={17} aria-hidden="true" />
+          <span>
+            {teamId ? <><b>{team?.name || `Team ${teamId}`}</b><small>{team?.manager ? `${team.manager} · ` : ''}Change team</small></> : <><b>Connect your FPL team</b><small>One time, takes 10 seconds</small></>}
+          </span>
+        </button>
         <nav className="nav">
           {PAGES.map(([k, label, Icon], i) => k === 'sep' ? <div key={i} className="nav-sep" /> : (
             <a key={k} href={`#/${k}`} aria-current={route === k ? 'page' : undefined}><Icon size={19} aria-hidden="true" />{label}</a>

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api.js'
 import { supabase } from './supabase.js'
-import { useHashRoute } from './hooks.js'
+import { useApi, useHashRoute } from './hooks.js'
 import Shell from './components/Shell.jsx'
+import ConnectDialog from './components/ConnectDialog.jsx'
 import { Card, Loading } from './components/ui.jsx'
 import Home from './pages/Home.jsx'
 import MyTeam from './pages/MyTeam.jsx'
@@ -19,7 +20,8 @@ export default function App() {
   const route = useHashRoute('home')
   const [status, setStatus] = useState(null)
   const [session, setSession] = useState(null)
-  const [settings, setSettings] = useState(() => ({ ...DEFAULTS, ...JSON.parse(localStorage.getItem('gaffer_settings') || '{}') }))
+  const [stored, setStored] = useState(() => ({ ...DEFAULTS, ...JSON.parse(localStorage.getItem('gaffer_settings') || '{}') }))
+  const [connectOpen, setConnectOpen] = useState(false)
 
   useEffect(() => {
     api('/status').then(setStatus).catch(() => setStatus({ state: 'error', message: 'Cannot reach the Gaffer API.' }))
@@ -29,9 +31,10 @@ export default function App() {
     return () => data.subscription.unsubscribe()
   }, [])
 
+  // Settings saved on your account follow you to a new device.
   useEffect(() => {
     if (!session) return
-    api('/me').then((m) => m.team_id && setSettings((s) => {
+    api('/me').then((m) => m.team_id && setStored((s) => {
       const next = { ...s, team_id: String(m.team_id), free_transfers: m.free_transfers, horizon: m.horizon }
       localStorage.setItem('gaffer_settings', JSON.stringify(next))
       return next
@@ -39,7 +42,7 @@ export default function App() {
   }, [session])
 
   const save = useCallback((patch) => {
-    setSettings((s) => {
+    setStored((s) => {
       const next = { ...s, ...patch }
       localStorage.setItem('gaffer_settings', JSON.stringify(next))
       if (session && next.team_id) {
@@ -49,10 +52,17 @@ export default function App() {
     })
   }, [session])
 
-  const ctx = { status, session, settings, save }
+  // A team ID built into the deployment (DEFAULT_TEAM_ID) is used until you connect a different one.
+  const teamId = stored.team_id || (status?.default_team_id ? String(status.default_team_id) : '')
+  const settings = { ...stored, team_id: teamId }
+  const ready = status?.state === 'ready'
+  const teamInfo = useApi(ready && teamId ? `/team?team_id=${teamId}` : null)
+  const team = teamInfo.data
+
+  const ctx = { status, session, settings, save, team, openConnect: () => setConnectOpen(true) }
   let page
   if (!status) page = <Loading rows={3} />
-  else if (status.state !== 'ready') page = (
+  else if (!ready) page = (
     <Card><div className="empty"><h2>{status.state === 'empty' ? 'No projections yet' : 'Something went wrong'}</h2><p>{status.message}</p></div></Card>
   )
   else page = {
@@ -61,9 +71,10 @@ export default function App() {
   }[route] || <Home {...ctx} />
 
   return (
-    <Shell route={route} status={status} session={session}>
+    <Shell route={route} status={status} session={session} team={team} teamId={teamId} openConnect={ctx.openConnect}>
       {status?.source === 'mock' && <div className="note" style={{ marginBottom: '1rem' }}>Demo data: a simulated league for testing. Remove the FPL_MOCK variable in GitHub to use real FPL data.</div>}
       {page}
+      {connectOpen && <ConnectDialog current={teamId} onClose={() => setConnectOpen(false)} onSave={(id) => { save({ team_id: id }); api('/track', { team_id: Number(id) }).catch(() => {}); setConnectOpen(false) }} />}
     </Shell>
   )
 }
