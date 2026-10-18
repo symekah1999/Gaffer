@@ -246,3 +246,13 @@ tr.benched td { color: var(--muted); }
 .team-chip b { font-size: .92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .team-chip small { color: var(--side-muted); }
 .connected { display: flex; align-items: center; gap: .8rem; min-height: 2.5rem; }
+
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+.timeline > li { border-left: 3px solid var(--turf); padding: .45rem 0 .45rem .85rem; background: var(--surface-2); border-radius: 0 var(--r-md) var(--r-md) 0; }
+.tl-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; }
+.tl-pts { margin-left: auto; font-size: .85rem; color: var(--muted); padding-right: .8rem; }
+.tl-move { margin: .3rem 0 0; font-size: .9rem; }
+.tl-moves { list-style: none; margin: .35rem 0 0; padding: 0; display: grid; gap: .2rem; }
+.tl-moves li { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; font-size: .92rem; }
+.tl-moves .out { color: var(--warn); font-weight: 600; } .tl-moves .in { color: var(--turf); font-weight: 700; }
+details.card > summary { list-style-position: inside; }

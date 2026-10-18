@@ -82,9 +82,9 @@ def user_id(authorization: Optional[str] = Header(None)) -> str:
 POOL = {1: 22, 2: 70, 3: 80, 4: 40}
 
 
-def _solver(limit):
+def _solver(limit, gap=0.002):
     try:
-        s = pulp.HiGHS(msg=False, timeLimit=limit)
+        s = pulp.HiGHS(msg=False, timeLimit=limit, gapRel=gap)
         if s.available():
             return s
     except Exception:
@@ -125,7 +125,8 @@ def optimise(players, gws, *, decay=0.92, budget=100.0, current=None, bank=0.0, 
     for p, n in ((1, 2), (2, 5), (3, 5), (4, 3)):
         P += pulp.lpSum(s[i] for i in ids if pool[i]["pos"] == p) == n
     for tm in {pool[i]["team"] for i in ids}:
-        P += pulp.lpSum(s[i] for i in ids if pool[i]["team"] == tm) <= 3
+        owned = sum(1 for i in current if i in pool and pool[i]["team"] == tm)   # a club move can leave you with 4
+        P += pulp.lpSum(s[i] for i in ids if pool[i]["team"] == tm) <= max(3, owned)
     P += pulp.lpSum(price[i] * s[i] for i in ids) <= ((bank + sum(current.values())) if current else budget) + 1e-6
     for i in ids:
         if i in exclude: P += s[i] == 0
@@ -157,14 +158,35 @@ def optimise(players, gws, *, decay=0.92, budget=100.0, current=None, bank=0.0, 
                 hits=hits, net_total=sum(gw_pts) - hit_cost * hits, cost=sum(price[i] for i in squad), price=price)
 
 
+def make_card(by_id, i, gws, price=None):
+    p = by_id[i]
+    xs = [float(p.get(f"xp_{g}") or 0) for g in gws]
+    return dict(id=i, name=p["name"], team=p["team_short"], pos=p["pos"], pos_name=p["pos_name"],
+                price=p["price"], buy_price=(price or {}).get(i, p["price"]), xp=xs, xp_next=xs[0],
+                fixture=(p.get("fixtures") or {}).get(str(gws[0]), "–"), status=p["status"],
+                news=p.get("news") or "", p_play=p.get("p_play") or 0,
+                haul=(p.get("haul") or {}).get(str(gws[0])))
+
+
+def best_lineup(ids, xp, pos):
+    """Best valid XI and captain from a set of players for one gameweek (exhaustive over formations)."""
+    by = {q: sorted([i for i in ids if pos.get(i) == q], key=lambda i: -xp.get(i, 0)) for q in (1, 2, 3, 4)}
+    best = None
+    for d in range(3, 6):
+        for m in range(2, 6):
+            f = 10 - d - m
+            if 1 <= f <= 3 and by[1] and len(by[2]) >= d and len(by[3]) >= m and len(by[4]) >= f:
+                xi = by[1][:1] + by[2][:d] + by[3][:m] + by[4][:f]
+                v = sum(xp.get(i, 0) for i in xi)
+                if best is None or v > best[0]:
+                    best = (v, xi)
+    if not best:
+        return [], None
+    return best[1], max(best[1], key=lambda i: xp.get(i, 0))
+
+
 def present(res, by_id, gws):
-    def card(i):
-        p = by_id[i]
-        xs = [float(p.get(f"xp_{g}") or 0) for g in gws]
-        return dict(id=i, name=p["name"], team=p["team_short"], pos=p["pos"], pos_name=p["pos_name"],
-                    price=p["price"], buy_price=res["price"].get(i, p["price"]), xp=xs, xp_next=xs[0],
-                    fixture=(p.get("fixtures") or {}).get(str(gws[0]), "–"), status=p["status"],
-                    news=p.get("news") or "", p_play=p.get("p_play") or 0)
+    card = lambda i: make_card(by_id, i, gws, res["price"])
     first = res["lineups"][0]
     xi = sorted((card(i) for i in first["xi"]), key=lambda p: (p["pos"], -p["xp_next"]))
     rest = [i for i in res["squad"] if i not in first["xi"]]
@@ -176,6 +198,107 @@ def present(res, by_id, gws):
                 hits=res["hits"], net_total=round(res["net_total"], 1), cost=round(res["cost"], 1),
                 transfers_out=[card(i) for i in res["transfers_out"]],
                 transfers_in=[card(i) for i in res["transfers_in"]])
+
+
+POOL_MULTI = dict(POOL)   # a smaller pool scored 4 pts/week less in the 2025-26 simulation
+MAX_FT = 5
+
+
+HIT_MARGIN = 1.0   # a hit must be worth 4 + 1 expected points before the planner takes it
+
+
+def plan_multi(players, gws, *, current, bank, free_transfers, decay=0.9, hit_cost=4.0, bench_weight=0.08,
+               ft_value=1.5, max_per_week=3, exclude=(), force=(), time_limit=20):
+    """Week-by-week transfer plan: when to transfer, when to roll a free transfer, when a hit pays off.
+    Free transfers bank up to 5; extra transfers cost 4 points; unused transfers left at the end are valued
+    at ft_value points each so the plan doesn't waste them in its last week."""
+    exclude, force = set(exclude), set(force)
+    weight = {p["id"]: sum((decay ** t) * (p.get(f"xp_{g}") or 0) for t, g in enumerate(gws)) for p in players}
+    keep = set(current) | force
+    for pos, n in POOL_MULTI.items():
+        cands = [p for p in players if p["pos"] == pos and p["id"] not in exclude and not p.get("hidden")]
+        keep |= {p["id"] for p in sorted(cands, key=lambda p: -weight[p["id"]])[:n]}
+    pool = {p["id"]: p for p in players if p["id"] in keep}
+    ids, T = list(pool), range(len(gws))
+    price = {i: current.get(i, pool[i]["price"]) for i in ids}
+    xp = {(i, t): float(pool[i].get(f"xp_{gws[t]}") or 0) for i in ids for t in T}
+    budget = bank + sum(current.values())
+
+    P = pulp.LpProblem("plan", pulp.LpMaximize)
+    B = lambda n: pulp.LpVariable(n, cat="Binary")
+    s = {(i, t): B(f"s{i}_{t}") for i in ids for t in T}
+    x = {(i, t): B(f"x{i}_{t}") for i in ids for t in T}
+    c = {(i, t): B(f"c{i}_{t}") for i in ids for t in T}
+    tin = {(i, t): B(f"in{i}_{t}") for i in ids for t in T}
+    tout = {(i, t): B(f"out{i}_{t}") for i in ids for t in T}
+    ft = {t: pulp.LpVariable(f"ft{t}", 0, MAX_FT, cat="Integer") for t in range(len(gws) + 1)}
+    used = {t: pulp.LpVariable(f"used{t}", 0, MAX_FT, cat="Integer") for t in T}
+    paid = {t: pulp.LpVariable(f"paid{t}", 0, max_per_week, cat="Integer") for t in T}
+    took_hit = {t: B(f"hit{t}") for t in T}
+
+    P += (pulp.lpSum((decay ** t) * (xp[i, t] * x[i, t] + xp[i, t] * c[i, t] + bench_weight * xp[i, t] * (s[i, t] - x[i, t]))
+                     for i in ids for t in T)
+          - (hit_cost + HIT_MARGIN) * pulp.lpSum(paid.values()) + ft_value * ft[len(gws)])
+    P += ft[0] == min(MAX_FT, max(0, free_transfers))
+    teams = {pool[i]["team"] for i in ids}
+    for t in T:
+        for i in ids:
+            prev = (1 if i in current else 0) if t == 0 else s[i, t - 1]
+            P += s[i, t] - prev == tin[i, t] - tout[i, t]
+            P += tin[i, t] + tout[i, t] <= 1
+            P += x[i, t] <= s[i, t]
+            P += c[i, t] <= x[i, t]
+            if i in exclude: P += s[i, t] == 0
+            if i in force: P += s[i, t] == 1
+        n = pulp.lpSum(tin[i, t] for i in ids)
+        P += n <= max_per_week
+        P += used[t] + paid[t] == n
+        P += used[t] <= ft[t]
+        # FPL uses free transfers first: a hit is only possible once every free transfer is used.
+        P += paid[t] <= max_per_week * took_hit[t]
+        P += used[t] >= ft[t] - MAX_FT * (1 - took_hit[t])
+        P += ft[t + 1] <= ft[t] - used[t] + 1
+        P += pulp.lpSum(s[i, t] for i in ids) == 15
+        for q, k in ((1, 2), (2, 5), (3, 5), (4, 3)):
+            P += pulp.lpSum(s[i, t] for i in ids if pool[i]["pos"] == q) == k
+        for tm in teams:
+            owned = sum(1 for i in current if i in pool and pool[i]["team"] == tm)
+            P += pulp.lpSum(s[i, t] for i in ids if pool[i]["team"] == tm) <= max(3, owned)
+        P += pulp.lpSum(price[i] * s[i, t] for i in ids) <= budget + 1e-6
+        P += pulp.lpSum(x[i, t] for i in ids) == 11
+        P += pulp.lpSum(x[i, t] for i in ids if pool[i]["pos"] == 1) == 1
+        for q, lo, hi in ((2, 3, 5), (3, 2, 5), (4, 1, 3)):
+            P += pulp.lpSum(x[i, t] for i in ids if pool[i]["pos"] == q) >= lo
+            P += pulp.lpSum(x[i, t] for i in ids if pool[i]["pos"] == q) <= hi
+        P += pulp.lpSum(c[i, t] for i in ids) == 1
+    P.solve(_solver(time_limit, gap=0.01))
+    val = lambda v: (v.value() or 0)
+    if sum(val(s[i, 0]) for i in ids) < 14.5:
+        raise HTTPException(422, "Couldn't find a valid plan for this squad. Try fewer locked players.")
+
+    weeks, lineups, gw_pts, hits_total = [], [], [], 0
+    pos_of = {i: pool[i]["pos"] for i in ids}
+    for t in T:
+        squad = [i for i in ids if val(s[i, t]) > 0.5]
+        xi = [i for i in ids if val(x[i, t]) > 0.5]
+        cap = max((i for i in ids if val(c[i, t]) > 0.5), key=lambda i: xp[i, t])
+        pts = sum(xp[i, t] for i in xi) + xp[cap, t]
+        h = int(round(val(paid[t])))
+        hits_total += h
+        lineups.append(dict(gw=gws[t], xi=xi, captain=cap)); gw_pts.append(pts)
+        weeks.append(dict(gw=gws[t], ft=int(round(val(ft[t]))), hits=h, points=round(pts, 1),
+                          ins=[i for i in ids if val(tin[i, t]) > 0.5], outs=[i for i in ids if val(tout[i, t]) > 0.5],
+                          captain=cap, squad=squad))
+    keep_total = 0.0
+    for t in T:
+        xpt = {i: xp[i, t] for i in current if i in pool}
+        kxi, kcap = best_lineup(list(xpt), xpt, pos_of)
+        keep_total += sum(xpt[i] for i in kxi) + (xpt[kcap] if kcap else 0)
+    sq0 = weeks[0]["squad"]
+    res = dict(squad=sq0, lineups=lineups, gw_points=gw_pts, raw_total=sum(gw_pts), hits=hits_total,
+               net_total=sum(gw_pts) - hit_cost * hits_total, cost=sum(price[i] for i in sq0), price=price,
+               transfers_out=weeks[0]["outs"], transfers_in=weeks[0]["ins"])
+    return res, weeks, keep_total, int(round(val(ft[len(gws)])))
 
 
 # ---------------------------------------------------------------- FPL team
@@ -224,6 +347,33 @@ def load_team(snap, team_id):
         now, buy = p["price"], bought.get(pk["element"]) or p.get("start_price") or p["price"]
         current[p["id"]] = round(buy + int(round((now - buy) * 10)) // 2 / 10, 1) if now > buy else now
     return current, picks["entry_history"]["bank"] / 10
+
+
+CHIPS = [("3xc", "Triple Captain"), ("bboost", "Bench Boost"), ("freehit", "Free Hit"), ("wildcard", "Wildcard")]
+
+
+def team_state(snap, team_id):
+    """Chips used and an estimate of free transfers, from the public FPL history."""
+    if snap["source"] == "mock":
+        return dict(chips_used=[], free_transfers_estimate=1)
+    h = fpl_get(f"/entry/{team_id}/history/")
+    chips_used = [dict(name=c["name"], event=c["event"]) for c in h.get("chips", [])]
+    wc_fh = {c["event"] for c in chips_used if c["name"] in ("wildcard", "freehit")}
+    ft = None
+    for row in sorted(h.get("current", []), key=lambda r: r["event"]):
+        if ft is None:            # first gameweek: unlimited transfers, 1 free transfer afterwards
+            ft = 1; continue
+        if row["event"] in wc_fh:
+            ft = min(MAX_FT, ft + 1); continue
+        paid = (row.get("event_transfers_cost") or 0) // 4
+        free_used = max(0, (row.get("event_transfers") or 0) - paid)
+        ft = min(MAX_FT, max(0, ft - free_used) + 1)
+    return dict(chips_used=chips_used, free_transfers_estimate=ft or 1)
+
+
+def chip_available(chips_used, chip, gw):
+    half = 1 if gw <= 19 else 2
+    return not any(c["name"] == chip and (1 if c["event"] <= 19 else 2) == half for c in chips_used)
 
 
 # ---------------------------------------------------------------- routes
@@ -321,7 +471,12 @@ def fixtures():
 def accuracy_rows():
     try:
         with db() as c:
-            return c.execute("select gw, kind, n, mae, rmse, corr, top10_avg, field_avg from gw_accuracy order by gw").fetchall()
+            try:
+                return c.execute("select gw, kind, n, mae, rmse, corr, top10_avg, field_avg, price_top10_avg, form_top10_avg "
+                                 "from gw_accuracy order by gw").fetchall()
+            except psycopg.errors.UndefinedColumn:
+                c.rollback()
+                return c.execute("select gw, kind, n, mae, rmse, corr, top10_avg, field_avg from gw_accuracy order by gw").fetchall()
     except psycopg.errors.UndefinedTable:
         return []
 
@@ -338,6 +493,7 @@ def _card(p, gws):
                 xp_next=p.get("xp_next") or 0, xp3=round(sum(p.get(f"xp_{g}") or 0 for g in gws[:3]), 1),
                 xp5=round(sum(p.get(f"xp_{g}") or 0 for g in gws[:5]), 1),
                 xp_total=p.get("xp_total") or 0, p_play=p.get("p_play") or 0, news=p.get("news") or "",
+                haul=p.get("haul_next"),
                 fixture=(p.get("fixtures") or {}).get(str(gws[0]), "–"))
 
 
@@ -417,8 +573,65 @@ def optimize_transfers(r: TransferReq):
     for p in plans:
         p["gain"] = round(p["net_total"] - base["net_total"], 1)
     best = max(range(len(plans)), key=lambda i: plans[i]["net_total"])
-    return dict(plans=plans, recommended=best, bank=bank, picks_gw=s.get("picks_gw"),
+    plan = None
+    if not r.wildcard:
+        res, weeks, keep_total, ft_end = plan_multi(s["players"], gws, current=current, bank=bank,
+                                                    free_transfers=r.free_transfers, exclude=r.exclude, force=r.force,
+                                                    time_limit=15)
+        plan = present(res, s["by_id"], gws)
+        card = lambda i: make_card(s["by_id"], i, gws, res["price"])
+        plan["weeks"] = [dict(gw=w["gw"], ft=w["ft"], hits=w["hits"], points=w["points"],
+                              captain=s["by_id"][w["captain"]]["name"],
+                              transfers_out=[card(i) for i in w["outs"]], transfers_in=[card(i) for i in w["ins"]])
+                         for w in weeks]
+        plan["keep_total"] = round(keep_total, 1)
+        plan["gain"] = round(plan["net_total"] - keep_total, 1)
+        plan["ft_end"] = ft_end
+    return dict(plan=plan, plans=plans, recommended=best, bank=bank, picks_gw=s.get("picks_gw"),
                 squad_value=round(sum(current.values()), 1))
+
+
+@app.get("/api/team/state")
+def get_team_state(team_id: int):
+    return team_state(snapshot(), team_id)
+
+
+@app.get("/api/chips")
+def chips(team_id: int):
+    """Best gameweek for each chip you still have, judged on your current squad."""
+    s = snapshot(); gws = s["gws"]; by_id = s["by_id"]
+    current, bank = load_team(s, team_id)
+    used = team_state(s, team_id)["chips_used"]
+    counts = {}
+    for t in s["fixtures"]:
+        for g in gws:
+            n = len(t["fixtures"].get(str(g), []))
+            c = counts.setdefault(g, dict(doubles=0, blanks=0))
+            c["doubles"] += n >= 2; c["blanks"] += n == 0
+    rows = []
+    for g in gws:
+        xp = {i: float(by_id[i].get(f"xp_{g}") or 0) for i in current if i in by_id}
+        pos = {i: by_id[i]["pos"] for i in xp}
+        xi, cap = best_lineup(list(xp), xp, pos)
+        base = sum(xp[i] for i in xi) + (xp[cap] if cap else 0)
+        try:
+            fh = optimise(s["players"], [g], budget=bank + sum(current.values()), time_limit=4)["gw_points"][0]
+        except HTTPException:
+            fh = base
+        rows.append(dict(gw=g, **counts[g], tc=round(xp.get(cap, 0), 1), tc_player=by_id[cap]["name"] if cap else None,
+                         bboost=round(sum(xp[i] for i in xp if i not in xi), 1), freehit=round(max(0.0, fh - base), 1)))
+    out = []
+    for key, label in CHIPS:
+        if key == "wildcard":
+            out.append(dict(chip=key, label=label, available=chip_available(used, key, gws[0])))
+            continue
+        col = {"3xc": "tc"}.get(key, key)
+        cands = [r for r in rows if chip_available(used, key, r["gw"])]
+        best = max(cands, key=lambda r: r[col]) if cands else None
+        out.append(dict(chip=key, label=label, available=chip_available(used, key, gws[0]),
+                        best_gw=best["gw"] if best else None, gain=best[col] if best else None,
+                        player=best["tc_player"] if (best and key == "3xc") else None))
+    return dict(gws=gws, weeks=rows, chips=out, used=used)
 
 
 @app.get("/api/me")

@@ -54,7 +54,7 @@ export default function Home({ status, settings, openConnect }) {
       {ins.loading ? <Loading rows={2} /> : i && (
         <div className="grid">
           <Card title="Captain picks" icon={Crown} sub={`Expected points for GW${status.next_gw}`} action={<a className="more" href="#/insights">More</a>}>
-            <ul className="list">{i.captains.slice(0, 3).map((p) => <PlayerRow key={p.id} p={p} value={p.xp_next} sub="xP" max={i.captains[0].xp_next} />)}</ul>
+            <ul className="list">{i.captains.slice(0, 3).map((p) => <PlayerRow key={p.id} p={p} value={p.xp_next} sub={p.haul != null ? `xP · ${Math.round(p.haul * 100)}% haul` : 'xP'} max={i.captains[0].xp_next} />)}</ul>
           </Card>
           <LastWeek teamId={settings.team_id} openConnect={openConnect} />
           <Card title="Differentials" icon={Sparkles} sub="Under 8% owned, next 3 gameweeks">

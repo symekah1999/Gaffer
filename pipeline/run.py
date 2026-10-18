@@ -7,11 +7,12 @@ import asyncio, json, os, time
 from pathlib import Path
 import psycopg
 from psycopg.types.json import Jsonb
-from .gaffer import model, reports
+from .gaffer import model, reports, history
 
 SCHEMA = (Path(__file__).resolve().parent.parent / "db" / "schema.sql").read_text()
 KEEP_SNAPSHOTS = 10
 BACKFILL_PER_RUN = int(os.getenv("BACKFILL_PER_RUN", "12"))
+MODEL_VERSION = 3   # bump when the model changes; rebuilt (backtest) weeks are then redone
 
 
 def dumps(o):
@@ -28,13 +29,14 @@ def log(*a):
 
 def upsert_predictions(conn, gw, df, kind):
     col = f"xp_{gw}"
-    rows = [(gw, int(i), float(x), float(pp), float(pr), kind)
+    rows = [(gw, int(i), float(x), float(pp), float(pr), kind, MODEL_VERSION)
             for i, x, pp, pr in zip(df.id, df[col], df.p_play, df.price)]
     with conn.cursor() as cur:
-        cur.executemany("""insert into predictions (gw, player_id, xp, p_play, price, kind, made_at)
-                           values (%s, %s, %s, %s, %s, %s, now())
+        cur.executemany("""insert into predictions (gw, player_id, xp, p_play, price, kind, model_version, made_at)
+                           values (%s, %s, %s, %s, %s, %s, %s, now())
                            on conflict (gw, player_id) do update set xp = excluded.xp, p_play = excluded.p_play,
-                             price = excluded.price, kind = excluded.kind, made_at = now()""", rows)
+                             price = excluded.price, kind = excluded.kind, model_version = excluded.model_version,
+                             made_at = now()""", rows)
 
 
 async def main_async():
@@ -53,10 +55,19 @@ async def main_async():
             log(f"  histories {done}/{total}")
     hist = await client.histories(ids, prog)
 
+    extra = None
+    if os.getenv("HISTORY", "0" if mock else "1") == "1":
+        log("Loading past seasons")
+        first = min((e.get("deadline_time") or "9999") for e in boot["events"])
+        start_year = int(first[:4]) if first[:4].isdigit() else time.gmtime().tm_year
+        extra = history.load_history(history.default_seasons(start_year, int(os.getenv("HISTORY_SEASONS", "4"))), log=log)
     log("Building projections")
-    df, grid, meta = model.build_projections(boot, fixtures, hist, horizon=8)
+    df, grid, meta = model.build_projections(boot, fixtures, hist, horizon=8, extra=extra)
     first = {pid: ((h.get("history") or [{}])[0].get("value")) for pid, h in hist.items()}
     df["start_price"] = [(first.get(i) or p * 10) / 10 for i, p in zip(df.id, df.price)]
+    bt = Path(__file__).with_name("backtest_results.json")
+    if bt.exists():
+        meta["backtest"] = json.loads(bt.read_text())
     nxt = next(e for e in boot["events"] if e["id"] == meta["next_gw"])
     meta["next_deadline"] = nxt.get("deadline_time")
     ev = next((e for e in boot["events"] if e.get("is_current")), None) or \
@@ -78,13 +89,17 @@ async def main_async():
         log(f"Saved snapshot and GW{meta['next_gw']} predictions")
 
         # ---- backfill reconstructed predictions for finished gameweeks
-        have = {r[0] for r in conn.execute("select distinct gw from predictions")}
-        for gw in [g for g in finished if g not in have][:BACKFILL_PER_RUN]:
+        have = {r[0]: (r[1], r[2]) for r in conn.execute(
+            "select gw, min(kind), min(model_version) from predictions group by gw")}
+        todo = [g for g in finished if g not in have or (have[g][0] == "backtest" and have[g][1] < MODEL_VERSION)]
+        rebuilt = set()
+        for gw in todo[:BACKFILL_PER_RUN]:
             b, f, h = reports.truncate_to_gw(boot, fixtures, hist, gw)
-            dfg, _, _ = model.build_projections(b, f, h, horizon=1)
+            dfg, _, _ = model.build_projections(b, f, h, horizon=1, extra=extra, evaluate=False)
             upsert_predictions(conn, gw, dfg, "backtest")
             conn.commit()
-            log(f"  backtest GW{gw}")
+            rebuilt.add(gw)
+            log(f"  backtest GW{gw} (model v{MODEL_VERSION})")
 
         # ---- actual points
         have_res = {r[0] for r in conn.execute("select distinct gw from results")}
@@ -108,14 +123,25 @@ async def main_async():
         res_by_gw = {}
         for gw, pid, pts, mins in conn.execute("select gw, player_id, points, minutes from results"):
             res_by_gw.setdefault(gw, {})[pid] = (pts, mins)
+        price_by_gw = {}
+        for gw, pid, price in conn.execute("select gw, player_id, price from predictions where gw = any(%s)", (finished,)):
+            price_by_gw.setdefault(gw, {})[pid] = price
         for gw, preds in preds_by_gw.items():
-            a = reports.accuracy(preds, res_by_gw.get(gw, {}))
+            form = {}
+            for g in range(gw - 4, gw):
+                for pid, (pts, mins) in res_by_gw.get(g, {}).items():
+                    form.setdefault(pid, []).append(pts)
+            form = {p: sum(v) / len(v) for p, v in form.items()}
+            a = reports.accuracy(preds, res_by_gw.get(gw, {}), price=price_by_gw.get(gw), form=form)
             if a:
-                conn.execute("""insert into gw_accuracy (gw, kind, n, mae, rmse, corr, top10_avg, field_avg, computed_at)
-                                values (%(gw)s, %(kind)s, %(n)s, %(mae)s, %(rmse)s, %(corr)s, %(top10_avg)s, %(field_avg)s, now())
+                conn.execute("""insert into gw_accuracy (gw, kind, n, mae, rmse, corr, top10_avg, field_avg,
+                                  price_top10_avg, form_top10_avg, computed_at)
+                                values (%(gw)s, %(kind)s, %(n)s, %(mae)s, %(rmse)s, %(corr)s, %(top10_avg)s, %(field_avg)s,
+                                  %(price_top10_avg)s, %(form_top10_avg)s, now())
                                 on conflict (gw) do update set kind = excluded.kind, n = excluded.n, mae = excluded.mae,
                                   rmse = excluded.rmse, corr = excluded.corr, top10_avg = excluded.top10_avg,
-                                  field_avg = excluded.field_avg, computed_at = now()""", dict(gw=gw, kind=kind_by_gw[gw], **a))
+                                  field_avg = excluded.field_avg, price_top10_avg = excluded.price_top10_avg,
+                                  form_top10_avg = excluded.form_top10_avg, computed_at = now()""", dict(gw=gw, kind=kind_by_gw[gw], **a))
         conn.commit()
 
         # ---- weekly team reports
@@ -133,7 +159,7 @@ async def main_async():
             done = {r[0] for r in conn.execute("select gw from team_reports where team_id = %s", (tid,))}
             n = 0
             for gw in finished:
-                if gw not in hrows or gw not in preds_by_gw or (gw in done and gw not in recent):
+                if gw not in hrows or gw not in preds_by_gw or (gw in done and gw not in recent and gw not in rebuilt):
                     continue
                 try:
                     picks = await client.entry_picks(tid, gw)

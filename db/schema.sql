@@ -68,3 +68,8 @@ create table if not exists tracked_teams (
   team_id   int primary key,
   added_at  timestamptz not null default now()
 );
+
+-- v2: model version on predictions (old rebuilt weeks are redone with newer models), rival baselines.
+alter table predictions add column if not exists model_version int not null default 1;
+alter table gw_accuracy add column if not exists price_top10_avg real;
+alter table gw_accuracy add column if not exists form_top10_avg real;

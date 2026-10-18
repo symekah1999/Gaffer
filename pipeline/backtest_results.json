@@ -1,0 +1,1684 @@
+{
+ "season": "2025-26",
+ "trained_on": [
+  "2022-23",
+  "2023-24",
+  "2024-25"
+ ],
+ "rules": "\u00a3100m start, 1 free transfer a week (up to 5 banked), -4 per extra transfer, captain\ndoubled, max 3 per club. Simplifications: no chips, no auto-subs, players sell at their current price.",
+ "engines": {
+  "gaffer:0.0": {
+   "corr": 0.22203386402879483,
+   "top10": 4.694736842105264,
+   "field": 3.0298538994767443,
+   "total": 1997,
+   "average": 52.55263157894737,
+   "hits": 12,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 54,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 31,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 3,
+     "points": 46,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 54,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 5,
+     "points": 43,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 6,
+     "points": 61,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 7,
+     "points": 66,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 8,
+     "points": 71,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 9,
+     "points": 40,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 10,
+     "points": 80,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 11,
+     "points": 41,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 58,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 39,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 14,
+     "points": 53,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 15,
+     "points": 61,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 16,
+     "points": 67,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 17,
+     "points": 65,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 18,
+     "points": 43,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 19,
+     "points": 52,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 20,
+     "points": 40,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 21,
+     "points": 54,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 22,
+     "points": 53,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 23,
+     "points": 35,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 24,
+     "points": 34,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 25,
+     "points": 63,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 26,
+     "points": 53,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 27,
+     "points": 42,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 28,
+     "points": 48,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 29,
+     "points": 72,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 30,
+     "points": 47,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 56,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 45,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 33,
+     "points": 62,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 34,
+     "points": 28,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 47,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 36,
+     "points": 82,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 37,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 46,
+     "transfers": 1,
+     "hits": 0
+    }
+   ],
+   "label": "Gaffer statistical model only"
+  },
+  "gaffer:0.3": {
+   "corr": 0.2364699718996758,
+   "top10": 4.831578947368421,
+   "field": 3.0298538994767443,
+   "total": 2036,
+   "average": 53.578947368421055,
+   "hits": 10,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 42,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 29,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 3,
+     "points": 66,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 53,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 5,
+     "points": 49,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 7,
+     "points": 64,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 8,
+     "points": 72,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 9,
+     "points": 46,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 10,
+     "points": 93,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 11,
+     "points": 35,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 30,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 45,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 14,
+     "points": 40,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 15,
+     "points": 81,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 16,
+     "points": 67,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 17,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 18,
+     "points": 34,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 19,
+     "points": 32,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 20,
+     "points": 29,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 21,
+     "points": 63,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 22,
+     "points": 45,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 23,
+     "points": 36,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 24,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 25,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 26,
+     "points": 56,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 27,
+     "points": 33,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 28,
+     "points": 57,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 29,
+     "points": 68,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 30,
+     "points": 43,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 50,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 56,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 33,
+     "points": 77,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 34,
+     "points": 44,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 43,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 36,
+     "points": 78,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 37,
+     "points": 72,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 48,
+     "transfers": 1,
+     "hits": 0
+    }
+   ],
+   "label": "Gaffer, 30% machine learning"
+  },
+  "gaffer:0.6": {
+   "corr": 0.24321220288812725,
+   "top10": 4.7368421052631575,
+   "field": 3.0298538994767443,
+   "total": 2005,
+   "average": 52.76315789473684,
+   "hits": 21,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 62,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 30,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 3,
+     "points": 50,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 54,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 5,
+     "points": 49,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 65,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 7,
+     "points": 65,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 8,
+     "points": 66,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 9,
+     "points": 54,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 10,
+     "points": 91,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 11,
+     "points": 43,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 28,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 17,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 14,
+     "points": 39,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 15,
+     "points": 49,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 16,
+     "points": 69,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 17,
+     "points": 71,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 18,
+     "points": 44,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 19,
+     "points": 32,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 20,
+     "points": 37,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 21,
+     "points": 59,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 22,
+     "points": 26,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 23,
+     "points": 30,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 24,
+     "points": 49,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 25,
+     "points": 64,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 26,
+     "points": 75,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 27,
+     "points": 39,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 28,
+     "points": 56,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 29,
+     "points": 64,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 30,
+     "points": 48,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 57,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 72,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 33,
+     "points": 83,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 34,
+     "points": 26,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 35,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 36,
+     "points": 72,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 37,
+     "points": 75,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 60,
+     "transfers": 1,
+     "hits": 0
+    }
+   ],
+   "label": "Gaffer, 60% machine learning"
+  },
+  "gaffer:1.0": {
+   "corr": 0.23346687829557886,
+   "top10": 4.6605263157894745,
+   "field": 3.0298538994767443,
+   "total": 1788,
+   "average": 47.05263157894737,
+   "hits": 26,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 25,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 29,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 3,
+     "points": 34,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 40,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 5,
+     "points": 31,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 33,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 7,
+     "points": 61,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 8,
+     "points": 35,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 9,
+     "points": 55,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 10,
+     "points": 86,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 11,
+     "points": 34,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 25,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 18,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 14,
+     "points": 48,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 15,
+     "points": 48,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 16,
+     "points": 63,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 17,
+     "points": 69,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 18,
+     "points": 35,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 19,
+     "points": 38,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 20,
+     "points": 27,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 21,
+     "points": 61,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 22,
+     "points": 27,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 23,
+     "points": 34,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 24,
+     "points": 61,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 25,
+     "points": 58,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 26,
+     "points": 76,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 27,
+     "points": 34,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 28,
+     "points": 56,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 29,
+     "points": 54,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 30,
+     "points": 52,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 50,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 70,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 33,
+     "points": 58,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 34,
+     "points": 31,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 34,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 36,
+     "points": 76,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 37,
+     "points": 78,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 44,
+     "transfers": 1,
+     "hits": 0
+    }
+   ],
+   "label": "Machine learning only"
+  },
+  "form": {
+   "corr": 0.1639559034609731,
+   "top10": 3.9842105263157896,
+   "field": 3.0298538994767443,
+   "total": 1537,
+   "average": 40.44736842105263,
+   "hits": 34,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 7,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 37,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 3,
+     "points": 14,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 39,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 5,
+     "points": 52,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 57,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 7,
+     "points": 59,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 8,
+     "points": 58,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 9,
+     "points": 39,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 10,
+     "points": 64,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 11,
+     "points": 21,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 12,
+     "points": 24,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 13,
+     "points": 19,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 14,
+     "points": 46,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 15,
+     "points": 36,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 16,
+     "points": 64,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 17,
+     "points": 32,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 18,
+     "points": 19,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 19,
+     "points": 18,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 20,
+     "points": 20,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 21,
+     "points": 52,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 22,
+     "points": 26,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 23,
+     "points": 47,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 24,
+     "points": 54,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 25,
+     "points": 31,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 26,
+     "points": 38,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 27,
+     "points": 30,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 28,
+     "points": 61,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 29,
+     "points": 78,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 30,
+     "points": 31,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 31,
+     "points": 25,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 32,
+     "points": 46,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 33,
+     "points": 67,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 34,
+     "points": 55,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 35,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 36,
+     "points": 33,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 37,
+     "points": 32,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 71,
+     "transfers": 1,
+     "hits": 0
+    }
+   ],
+   "label": "Form (average of last 5 games)"
+  },
+  "fpl_xp": {
+   "corr": 0.5542954852557244,
+   "top10": 3.6500000000000004,
+   "field": 3.0298538994767443,
+   "total": 1653,
+   "average": 43.5,
+   "hits": 6,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 49,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 70,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 3,
+     "points": 43,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 4,
+     "points": 71,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 5,
+     "points": 44,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 96,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 7,
+     "points": 50,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 8,
+     "points": 86,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 9,
+     "points": 71,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 10,
+     "points": 47,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 11,
+     "points": 24,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 21,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 12,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 14,
+     "points": 46,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 15,
+     "points": 33,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 16,
+     "points": 37,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 17,
+     "points": 52,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 18,
+     "points": 23,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 19,
+     "points": 26,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 20,
+     "points": 31,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 21,
+     "points": 28,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 22,
+     "points": 22,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 23,
+     "points": 29,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 24,
+     "points": 66,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 25,
+     "points": 57,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 26,
+     "points": 56,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 27,
+     "points": 28,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 28,
+     "points": 46,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 29,
+     "points": 74,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 30,
+     "points": 37,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 14,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 17,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 33,
+     "points": 28,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 34,
+     "points": 30,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 35,
+     "points": 41,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 36,
+     "points": 52,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 37,
+     "points": 42,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 54,
+     "transfers": 2,
+     "hits": 0
+    }
+   ],
+   "label": "FPL's official expected points"
+  },
+  "gaffer:0.3+plan": {
+   "corr": 0.2364699718996758,
+   "top10": 4.831578947368421,
+   "field": 3.0298538994767443,
+   "total": 2024,
+   "average": 53.26315789473684,
+   "hits": 6,
+   "weeks": [
+    {
+     "gw": 1,
+     "points": 42,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 2,
+     "points": 29,
+     "transfers": 3,
+     "hits": 2
+    },
+    {
+     "gw": 3,
+     "points": 50,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 4,
+     "points": 51,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 5,
+     "points": 49,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 6,
+     "points": 57,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 7,
+     "points": 79,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 8,
+     "points": 68,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 9,
+     "points": 44,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 10,
+     "points": 82,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 11,
+     "points": 41,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 12,
+     "points": 55,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 13,
+     "points": 38,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 14,
+     "points": 59,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 15,
+     "points": 67,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 16,
+     "points": 60,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 17,
+     "points": 66,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 18,
+     "points": 45,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 19,
+     "points": 28,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 20,
+     "points": 54,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 21,
+     "points": 54,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 22,
+     "points": 44,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 23,
+     "points": 36,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 24,
+     "points": 54,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 25,
+     "points": 72,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 26,
+     "points": 72,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 27,
+     "points": 56,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 28,
+     "points": 41,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 29,
+     "points": 71,
+     "transfers": 2,
+     "hits": 0
+    },
+    {
+     "gw": 30,
+     "points": 29,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 31,
+     "points": 66,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 32,
+     "points": 31,
+     "transfers": 0,
+     "hits": 0
+    },
+    {
+     "gw": 33,
+     "points": 74,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 34,
+     "points": 45,
+     "transfers": 3,
+     "hits": 1
+    },
+    {
+     "gw": 35,
+     "points": 38,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 36,
+     "points": 77,
+     "transfers": 2,
+     "hits": 1
+    },
+    {
+     "gw": 37,
+     "points": 63,
+     "transfers": 1,
+     "hits": 0
+    },
+    {
+     "gw": 38,
+     "points": 37,
+     "transfers": 0,
+     "hits": 0
+    }
+   ],
+   "label": "Gaffer, 30% machine learning, week-by-week planner"
+  }
+ }
+}

@@ -28,11 +28,11 @@ export default function Insights({ status }) {
     <div className="stack">
       <PageHead title="Insights" intro={`What the model sees ahead of GW${status.next_gw}. xP means expected points.`} />
       <div className="grid two">
-        <Card title="Captaincy" icon={Crown} sub={`Highest expected points for GW${g[0]} (before doubling)`}>
-          <ul className="list">{i.captains.map((p) => <PlayerRow key={p.id} p={p} value={p.xp_next} sub="xP" max={i.captains[0].xp_next} />)}</ul>
+        <Card title="Captaincy" icon={Crown} sub={`Highest expected points for GW${g[0]} (before doubling), with the chance of a 10+ point haul`}>
+          <ul className="list">{i.captains.map((p) => <PlayerRow key={p.id} p={p} value={p.xp_next} sub={p.haul != null ? `xP · ${Math.round(p.haul * 100)}% haul` : 'xP'} max={i.captains[0].xp_next} />)}</ul>
         </Card>
         <Card title="Differentials" icon={Sparkles} sub={`Under 8% owned, best over GW${g[0]}–${g[2]}`}>
-          <ul className="list">{i.differentials.map((p) => <PlayerRow key={p.id} p={p} value={p.xp3} sub="xP" />)}</ul>
+          <ul className="list">{i.differentials.map((p) => <PlayerRow key={p.id} p={p} value={p.xp3} sub={p.haul != null ? `xP · ${Math.round(p.haul * 100)}% haul next` : 'xP'} />)}</ul>
         </Card>
         <Card title="Best value" icon={Coins} sub="Expected points per £m over the next 5 gameweeks"
           action={<Seg label="Position" value={pos} onChange={setPos} options={[['GKP', 'GK'], ['DEF', 'DEF'], ['MID', 'MID'], ['FWD', 'FWD']]} />}>

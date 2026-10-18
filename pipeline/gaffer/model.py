@@ -164,8 +164,12 @@ def next_gameweek(events):
     raise ValueError("No upcoming gameweek: the season looks finished.")
 
 
-def build_projections(bootstrap, fixtures, histories, horizon=8, progress=None):
-    teams, elements, events = bootstrap["teams"], bootstrap["elements"], bootstrap["events"]
+ML_WEIGHT = 0.3   # tuned by the season simulation, see pipeline/backtest.py
+
+
+def build_projections(bootstrap, fixtures, histories, horizon=8, progress=None, extra=None, evaluate=True):
+    teams, events = bootstrap["teams"], bootstrap["events"]
+    elements = [e for e in bootstrap["elements"] if e.get("element_type") in POS_NAME]
     team_short = {t["id"]: t["short_name"] for t in teams}
     next_gw = next_gameweek(events)
     gws = [g for g in range(next_gw, min(next_gw + horizon, 39))]
@@ -204,11 +208,17 @@ def build_projections(bootstrap, fixtures, histories, horizon=8, progress=None):
             if k == 0:
                 bds[pid] = {kk: round(v * av, 2) for kk, v in bd_sum.items()}
 
-    ml_pred, ml_meta = ml.run_ml(elements, teams, fixtures, histories, upcoming)
+    ml_pred, ml_hauls, ml_meta = ml.run_ml(elements, teams, fixtures, histories, upcoming, extra=extra, evaluate=evaluate)
     rounds = ml_meta.get("rounds", 0)
     w_ml = 0.0
-    if ml_meta.get("enabled") and ml_meta.get("skill", 0) > 0:
-        w_ml = float(np.clip(0.05 * (rounds - 3), 0.0, 0.5))
+    if ml_meta.get("enabled"):
+        if ml_meta.get("history_rows"):
+            # Trained on past seasons. 30% scored the most points in the 2025-26 season simulation
+            # (pipeline/backtest.py); more ML predicted slightly better but chased hits and scored less.
+            skill = ml_meta.get("skill", ml_meta.get("season_test", {}).get("skill", 0))
+            w_ml = ML_WEIGHT if skill > 0 else 0.0
+        elif ml_meta.get("skill", 0) > 0:
+            w_ml = float(np.clip(0.05 * (rounds - 3), 0.0, 0.3))
     ml_meta["weight"] = w_ml
 
     rows = []
@@ -221,7 +231,7 @@ def build_projections(bootstrap, fixtures, histories, horizon=8, progress=None):
             selected=float(e.get("selected_by_percent") or 0), form=float(e.get("form") or 0),
             total_points=e.get("total_points", 0), minutes=e.get("minutes", 0),
             p_play=round(availability(e, 0), 2), e_min=round(rates_of[pid]["e_min"], 1),
-            fixtures={}, bd=bds.get(pid, {}),
+            fixtures={}, bd=bds.get(pid, {}), haul={},
         )
         tot = 0.0
         for k, gw in enumerate(gws):
@@ -230,11 +240,16 @@ def build_projections(bootstrap, fixtures, histories, horizon=8, progress=None):
             if w_ml and (pid, gw) in ml_pred:
                 v = w_ml * ml_pred[(pid, gw)] * availability(e, k) + (1 - w_ml) * h
             row[f"xp_{gw}"] = round(v, 2)
+            row[f"h_{gw}"] = round(h, 3)
+            row[f"m_{gw}"] = round(ml_pred[(pid, gw)] * availability(e, k), 3) if (pid, gw) in ml_pred else None
+            if (pid, gw) in ml_hauls:
+                row["haul"][gw] = round(ml_hauls[(pid, gw)] * availability(e, k), 3)
             tot += v
             fx = team_fx[tid].get(gw, [])
             row["fixtures"][gw] = ", ".join(f"{x['opp']} ({'H' if x['home'] else 'A'})" for x in fx) or "–"
         row["xp_total"] = round(tot, 2)
         row["xp_next"] = row[f"xp_{gws[0]}"]
+        row["haul_next"] = row["haul"].get(gws[0])
         row["value_per_m"] = round(tot / row["price"], 2) if row["price"] else 0
         if e.get("status") in ("u", "n"):
             row["hidden"] = True

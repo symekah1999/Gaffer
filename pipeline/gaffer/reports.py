@@ -9,20 +9,29 @@ def truncate_to_gw(boot, fixtures, hist, gw):
               for e in boot["events"]]
     fx = [f if (f.get("event") or 99) < gw else {**f, "team_h_score": None, "team_a_score": None, "finished": False}
           for f in fixtures]
-    h2, price = {}, {}
+    h2, price, club = {}, {}, {}
     for pid, s in hist.items():
         rows = s.get("history") or []
         h2[pid] = {"history": [r for r in rows if (r.get("round") or 99) < gw], "history_past": s.get("history_past")}
-        at = next((r.get("value") for r in rows if r.get("round") == gw), None)
-        if at:
-            price[pid] = at
+        row = next((r for r in rows if r.get("round") == gw), None)
+        if row and row.get("value"):
+            price[pid] = row["value"]
+        if row and row.get("team_id") is not None and row["team_id"] == row["team_id"]:   # archive data only
+            club[pid] = int(row["team_id"])
     els = [{**e, "status": "a", "chance_of_playing_next_round": None, "news": "",
-            "now_cost": price.get(e["id"], e["now_cost"])} for e in boot["elements"]]
+            "now_cost": price.get(e["id"], e["now_cost"]), "team": club.get(e["id"], e["team"])} for e in boot["elements"]]
     return {**boot, "events": events, "elements": els}, fx, h2
 
 
-def accuracy(preds, results):
-    """preds {pid: xp}; results {pid: (points, minutes)}."""
+def _top10(score, results):
+    if not score:
+        return None
+    top = sorted(score, key=lambda p: -score[p])[:10]
+    return float(np.mean([results.get(p, (0, 0))[0] for p in top]))
+
+
+def accuracy(preds, results, price=None, form=None):
+    """preds {pid: xp}; results {pid: (points, minutes)}; price/form {pid: value} give rival top-10 picks."""
     rows = [(xp, results[p][0]) for p, xp in preds.items() if p in results and (results[p][1] > 0 or xp >= 2)]
     if len(rows) < 20:
         return None
@@ -32,7 +41,8 @@ def accuracy(preds, results):
     return dict(n=len(rows), mae=float(np.mean(np.abs(x - y))), rmse=float(np.sqrt(np.mean((x - y) ** 2))),
                 corr=float(np.corrcoef(x, y)[0, 1]),
                 top10_avg=float(np.mean([results.get(p, (0, 0))[0] for p in top])),
-                field_avg=float(np.mean(played)) if played else None)
+                field_avg=float(np.mean(played)) if played else None,
+                price_top10_avg=_top10(price, results), form_top10_avg=_top10(form, results))
 
 
 def best_lineup(ids, xp, pos):
