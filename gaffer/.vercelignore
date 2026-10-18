@@ -1,0 +1,4 @@
+pipeline
+.github
+**/node_modules
+**/.venv
