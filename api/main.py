@@ -18,6 +18,16 @@ HORIZON = 8
 app = FastAPI(title="Gaffer API")
 
 
+@app.middleware("http")
+async def accept_api_prefix(request, call_next):
+    """Routes are declared as /api/...; accept the path with or without the prefix, so the app works
+    whether the platform forwards the original path or strips the /api mount prefix."""
+    path = request.scope["path"]
+    if not path.startswith("/api"):
+        request.scope["path"] = "/api" + path
+    return await call_next(request)
+
+
 # ---------------------------------------------------------------- data
 def db():
     if not DB_URL:

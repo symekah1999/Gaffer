@@ -21,18 +21,23 @@ Installs as an app on phone and desktop.
   rebuilt from data available before each deadline.
 - **Neon** (`db/schema.sql`) stores snapshots, frozen predictions, actual results, accuracy, weekly team
   reports and user settings.
-- **Vercel** hosts the React app (`frontend/`) and a lightweight Python API (`api/index.py`) that reads
+- **Vercel** hosts the React app (`frontend/`) and a lightweight Python API (`api/main.py`) that reads
   the latest snapshot and runs the squad/transfer optimiser (HiGHS solver, about 1 second).
 - **Supabase** handles sign-in so your team ID and settings follow you across devices.
   Signing in is optional; everything else works without an account.
 
 Setup: see DEPLOY.md.
 
+## Vercel setup
+One Vercel project with two services (see `vercel.json`): `frontend` (Vite, served at `/`) and `api`
+(FastAPI, served at `/api/*`). The data pipeline is not a Vercel service; it runs in GitHub Actions.
+The services don't call each other, so no bindings are needed.
+
 ## Local development
 ```
 # once
 python -m venv .venv && source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt -r pipeline/requirements.txt uvicorn
+pip install -r api/requirements.txt -r pipeline/requirements.txt uvicorn
 cd frontend && npm install && cd ..
 
 # fill the database (FPL_MOCK=1 for simulated data)
@@ -40,7 +45,7 @@ export DATABASE_URL="postgresql://..."                       # Windows: $env:DAT
 python -m pipeline.run
 
 # run the API and the app
-uvicorn api.index:app --port 8000 --reload
+(cd api && uvicorn main:app --port 8000 --reload)
 cd frontend && npm run dev                                   # http://localhost:5173
 ```
 For sign-in locally, copy `frontend/.env.example` to `frontend/.env.local` and fill it in, and set
